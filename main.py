@@ -353,7 +353,6 @@ with tab3:
                         time.sleep(3)
                         st.session_state['add_cat_or_act'] = False
                         st.session_state['category_color'] = None
-                        print('se logró en categoría')
                         st.rerun()
                     else:
                         st.error('''Error al guardar en bd.
@@ -376,7 +375,6 @@ with tab3:
                         time.sleep(3)
                         st.session_state['add_cat_or_act'] = False
                         st.session_state['category_color'] = None
-                        print('se logró en actividad')
                         st.rerun()
                     else:
                         st.error('''Error al guardar en bd.

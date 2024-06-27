@@ -16,9 +16,12 @@ def get_local_current_datetime() -> datetime:
     datetime
         local timezone current datetime.
     """
-    now = datetime.now(tz=pytz.timezone('UTC'))
+    utc_now = datetime.now(tz=pytz.timezone('UTC'))
     my_tz = pytz.timezone('America/Lima')
-    return now.astimezone(my_tz)
+    local_now = utc_now.astimezone(my_tz)
+    print(f'{utc_now = }')
+    print(f'{local_now = }\n')
+    return local_now
 
 
 def get_week_range(date_: datetime = datetime.now(), local_tz: bool = True) -> List[datetime]:
@@ -54,7 +57,12 @@ def get_week_range(date_: datetime = datetime.now(), local_tz: bool = True) -> L
 def validate_date(bonita_week: collection, bonita_duties: collection) -> None:
     db_date = [d for d in bonita_week.find()][0]
     now = get_local_current_datetime()
-    if now > db_date['current_week']['end_week']:
+    end_week = db_date['current_week']['end_week']
+    my_tz = pytz.timezone('America/Lima')
+    tz_end_week = end_week.astimezone(my_tz)
+    print(f'{end_week = }')
+    print(f'{tz_end_week = }\n')
+    if now > tz_end_week:
         clean = bonita_duties.update_many(
                     {},
                     {'$set': {
