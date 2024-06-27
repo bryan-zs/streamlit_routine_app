@@ -1,12 +1,11 @@
 import time
 import pymongo
-# import certifi
 import streamlit as st
-from datetime import datetime
 from utils import get_week_range, validate_date, make_donut,\
                   general_styles, button_day, button_today,\
                   button_color_picker, input_text, button_submit,\
-                  button_edit_del_cat, button_edit_del_act
+                  button_edit_del_cat, button_edit_del_act,\
+                  get_local_current_datetime
 
 
 st.set_page_config(layout='centered', page_title='Rutina Bonita')
@@ -29,9 +28,8 @@ st.markdown(general_styles, unsafe_allow_html=True)
 @st.cache_resource
 def init_connection():
     print('Reload connection')
-    # ca = certifi.where()
     connection_string = st.secrets['mongo']['connect']
-    return pymongo.MongoClient(connection_string)#, tlsCAFile=ca)
+    return pymongo.MongoClient(connection_string)
 
 client = init_connection()
 bonita_db = client['bonita_db']
@@ -78,12 +76,13 @@ with tab1:
     if 'daily_progress' not in st.session_state:
         st.session_state['daily_progress'] = [False for _ in range(7)]
 
-    week_range_dates = get_week_range()
+    week_range_dates = get_week_range(local_tz=True)
     week_range = [week_day.day for week_day in week_range_dates]
     days = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
     days_names = [f'{d[0]}{d[1]}' for d in list(zip(week_range, days))]
-    today = datetime.now().day
-    n_today = datetime.now().weekday()
+    local_now = get_local_current_datetime()
+    today = local_now.day
+    n_today = local_now.weekday()
 
     _, _, col1, col2, col3, col4, col5, col6, col7, _, _ = st.columns(11)
     cols = [col1, col2, col3, col4, col5, col6, col7]

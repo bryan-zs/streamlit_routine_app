@@ -1,3 +1,4 @@
+import pytz
 import pandas as pd
 import altair as alt
 import streamlit as st
@@ -7,19 +8,37 @@ from pymongo import collection
 from datetime import datetime, timedelta
 
 
-def get_week_range(date_: datetime = datetime.now()) -> List[datetime]:
+def get_local_current_datetime() -> datetime:
+    """Get datetime now in local timezone.
+
+    Returns
+    -------
+    datetime
+        local timezone current datetime.
+    """
+    now = datetime.now(tz=pytz.timezone('UTC'))
+    my_tz = pytz.timezone('America/Lima')
+    return now.astimezone(my_tz)
+
+
+def get_week_range(date_: datetime = datetime.now(), local_tz: bool = True) -> List[datetime]:
     """Dada una fecha, calcula el rango de fechas de lunes a domingo.
 
     Parameters
     ----------
     date_ : datetime, optional
         Fecha de la que se requiere calcular su rango semanal, by default datetime.now()
+    local_tz: bool, optional
+        Indica si se debe utilizar la fecha y hora en la zona horaria local.
 
     Returns
     -------
     List[int]
         Lista con todas las fechas de lunes a domingo.
     """
+    if local_tz:
+        date_ = get_local_current_datetime()
+
     start = date_ - timedelta(days=date_.weekday())
     end = start + timedelta(days=6)
 
@@ -34,7 +53,7 @@ def get_week_range(date_: datetime = datetime.now()) -> List[datetime]:
 
 def validate_date(bonita_week: collection, bonita_duties: collection) -> None:
     db_date = [d for d in bonita_week.find()][0]
-    now = datetime.now()
+    now = get_local_current_datetime()
     if now > db_date['current_week']['end_week']:
         clean = bonita_duties.update_many(
                     {},
